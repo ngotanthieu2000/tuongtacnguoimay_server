@@ -8,4 +8,14 @@ router.get('/', async (req,res)=>{
     res.status(404).json(getRoles)
 })
 
+router.post('/create', async(req,res)=>{
+    const createRoles = new RolesModel(req.body)
+    if(createRoles) {
+        console.log(createRoles)
+        await createRoles.save()
+        res.status(200).json({Message:"Successfully!"})
+    }
+    else res.status(403).json({Message:"Erorr, please try again"})
+})
+
 module.exports = router;
