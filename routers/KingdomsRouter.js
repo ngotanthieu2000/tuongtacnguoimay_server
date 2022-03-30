@@ -8,4 +8,15 @@ router.get('/', async (req,res)=>{
     res.status(404).json(getKingdoms)
 })
 
+router.post('/create',async (req,res)=>{
+    const createKingdoms = new KingdomsModel(req.body)
+    if(!createKingdoms) res.status(403).json({Message:"Error, please try again"})
+    res.status(200).json(createKingdoms)
+})
+
+router.delete('/delete', async (req,res) =>{
+    const deleteKingdoms = await KingdomsModel.findByIdAndDelete({_id:req.body.id})
+    if(!deleteKingdoms) res.status(403).json({Message:"Error, please try again"})
+    res.status(200).json(deleteKingdoms)
+})
 module.exports = router;
