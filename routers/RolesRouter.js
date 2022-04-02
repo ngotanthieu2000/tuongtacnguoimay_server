@@ -7,13 +7,18 @@ router.get('/', async (req,res)=>{
     if(!getRoles) res.status(404).json({Message:"Not found!"})
     res.status(404).json(getRoles)
 })
-
+// create role document
+/*
+    {
+        "roleName":""
+    }
+*/
 router.post('/create', async(req,res)=>{
     const createRoles = new RolesModel(req.body)
     if(createRoles) {
         console.log(createRoles)
         await createRoles.save()
-        res.status(200).json({Message:"Successfully!"})
+        res.status(200).json({Message:"Successfully!",Role:createRoles})
     }
     else res.status(403).json({Message:"Erorr, please try again"})
 })

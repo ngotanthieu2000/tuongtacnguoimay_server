@@ -5,7 +5,6 @@ const AnimalSchema = new Schema({
     scientificName:{type:String},
     vietnameseName:{type:String},
     commonName:{type:String},
-    kingdom:{type:mongoose.Schema.Types.ObjectId, ref:"Kingdoms"},
     phylum:{type:mongoose.Schema.Types.ObjectId, ref:"Phylums"},
     class:{type:mongoose.Schema.Types.ObjectId, ref:"Class"},
     order:{type:mongoose.Schema.Types.ObjectId, ref:"Orders"},
@@ -21,6 +20,7 @@ const AnimalSchema = new Schema({
     specimen:{type:String},
     habitat:{type:String},
     place:{type:String},
+    status:{type:String ,default: "Not approved yet"},
     specimenCollectionDate:{type:Date},
     specimentCollector:{type:mongoose.Schema.Types.ObjectId, ref:"Users"}
 },{timestamps:true})
