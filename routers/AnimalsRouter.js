@@ -38,11 +38,8 @@ router.get('/:slug', async (req,res)=>{
    try {
     let phylum = req.params.slug
     // console.log(phylum)
-    const animals = await AnimalsModel.find({phylum:req.params.slug}).select(['_id','avatar'])
+    const animals = await AnimalsModel.find({class:req.params.slug}).select(['_id','avatar'])
     if(!animals) res.status(404).json({Message:"Not found!"})
-    // res.status(200).json(animals)
-    let avatar = animals[0].avatar
-    console.log(avatar)
     res.status(200).json(animals)
    } catch (error) {
      res.status(403).json(error)
