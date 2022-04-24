@@ -1,11 +1,9 @@
 const express = require('express')
-const bodyParser = require('body-parser')
 const router=express.Router()
 const AnimalsModel = require('../models/AnimalsModel.js');
 const UsersModel = require('../models/UsersModel.js');
-const {uploadFile, deleteFile, upload} = require('../models/UploadMode.js')
+const {uploadFile, upload} = require('../models/UploadMode.js')
 const fs = require('fs')
-const { unlink } = require('fs/promises')
 
 const auth = async (req,res,next)=>{
   // console.log(req.body.specimentCollector)
@@ -39,19 +37,12 @@ const auth = async (req,res,next)=>{
 router.get('/:slug', async (req,res)=>{
    try {
     let phylum = req.params.slug
-    console.log(phylum)
-    const animals = await AnimalsModel.find({phylum:phylum}).select(['_id','avatar'])
-    // const animals = await AnimalsModel.aggregate([
-    //   {
-    //     $lookup:{
-    //       from:'phylums',
-    //       localField:'phylum',
-    //       foreignField:"_id",
-    //       as:'phylum'
-    //     }
-    //   }
-    // ])
+    // console.log(phylum)
+    const animals = await AnimalsModel.find({phylum:req.params.slug}).select(['_id','avatar'])
     if(!animals) res.status(404).json({Message:"Not found!"})
+    // res.status(200).json(animals)
+    let avatar = animals[0].avatar
+    console.log(avatar)
     res.status(200).json(animals)
    } catch (error) {
      res.status(403).json(error)
