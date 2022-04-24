@@ -36,8 +36,6 @@ const auth = async (req,res,next)=>{
 
 router.get('/:slug', async (req,res)=>{
    try {
-    let phylum = req.params.slug
-    // console.log(phylum)
     const animals = await AnimalsModel.find({class:req.params.slug}).select(['_id','avatar'])
     if(!animals) res.status(404).json({Message:"Not found!"})
     res.status(200).json(animals)
@@ -85,8 +83,8 @@ router.post('/create',upload.fields([{name:'avatar'},{name:'relevantImages'}]),a
       class:req.body.class,
       order:req.body.order,
       family:req.body.family,
-      image:req.files['relevantImages'].map(a=>a.path),
-      avatar: req.files['avatar'][0].path,
+      image:await Promise.all(req.files['relevantImages'].map(async(a)=>await uploadFile(req.body.scientificName.replace(/\s/g, ''),a.path,true))) ,
+      avatar:  await uploadFile(req.body.scientificName.replace(/\s/g, ''),req.files['avatar'][0].path,true) ,
       morphologicalCharacterization: typeof(req.body.morphologicalCharacterization) === "string" ? JSON.parse(req.body.morphologicalCharacterization):morphologicalCharacterization,
       ecologicalCharacteristics:req.body.ecologicalCharacteristics,
       value:req.body.value,
@@ -100,7 +98,7 @@ router.post('/create',upload.fields([{name:'avatar'},{name:'relevantImages'}]),a
       specimenCollectionDate:req.body.specimenCollectionDate,
       specimentCollector:req.body.specimentCollector
     }
-    // console.log(animal)
+    console.log(animal)
     const createAnimal = new AnimalsModel(animal)
     if(createAnimal) {
       // console.log(createAnimal)
@@ -108,7 +106,7 @@ router.post('/create',upload.fields([{name:'avatar'},{name:'relevantImages'}]),a
       res.status(200).json({Message:"Successfully!",Animal:createAnimal})
     }
   } catch (error) {
-    res.status(403).json({Message:"Erorr, please try again"})
+    res.status(403).json(error)
   }
 });
 
@@ -116,16 +114,7 @@ router.put('/:slug',auth,async (req,res)=>{
   // console.log('Next success')
   try {
     if(req.params.slug === 'approved'){
-      // console.log(req.body.animalId)
-      const animals = await AnimalsModel.findById({_id:req.body.animalId})
-      // console.log(animals)
-      let avatar = await uploadFile(animals.scientificName.replace(/\s/g, ''),animals.avatar,true)
-      // console.log(avatar)
-      let image = animals.image.forEach(async (element) =>{
-        // console.log('Upload to drive')
-        await uploadFile(animals.scientificName.replace(/\s/g, ''),element,true)
-      })
-      const animalsUpdate = await AnimalsModel.findByIdAndUpdate({_id:req.body.animalId},{avatar,image,status:"Approved",cause:""},{new:true})
+      const animalsUpdate = await AnimalsModel.findByIdAndUpdate({_id:req.body.animalId},{status:"Approved",cause:""},{new:true})
       await animalsUpdate.save()
       // console.log(animalsUpdate)
       res.status(200).json("Approved Successfully")
