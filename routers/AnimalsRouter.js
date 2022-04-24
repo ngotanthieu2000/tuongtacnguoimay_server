@@ -3,7 +3,6 @@ const bodyParser = require('body-parser')
 const router=express.Router()
 const AnimalsModel = require('../models/AnimalsModel.js');
 const UsersModel = require('../models/UsersModel.js');
-const createCoordinates = require('./CoordinatesRouter.js')
 const {uploadFile, deleteFile, upload} = require('../models/UploadMode.js')
 const fs = require('fs')
 const { unlink } = require('fs/promises')
