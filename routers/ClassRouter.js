@@ -4,7 +4,17 @@ const ClassModel = require('../models/ClassModel.js');
 
 router.get('/', async (req,res)=>{
     try {
-        const getClass = await ClassModel.find().populate({path:'phylum', select:'phylumsName'})
+        const getClass = await ClassModel.find({phylum:req.body.id ? req.body.id:""}).select(['_id','className'])
+        if(!getClass) res.status(404).json({Message:"Not found!"})
+        res.status(200).json(getClass)
+    } catch (error) {
+        res.status(400).json({Message:"Requests Invalid", Error:error})
+    }
+})
+router.get('/:slug',async (req,res)=>{
+    try {
+        // console.log(req.params.slug)
+        const getClass = await ClassModel.find({phulum:req.params.slug ? req.params.slug:""}).select(['_id','className'])
         if(!getClass) res.status(404).json({Message:"Not found!"})
         res.status(200).json(getClass)
     } catch (error) {
@@ -36,39 +46,6 @@ router.delete('/delete', async (req,res) =>{
     }
 })
 
-router.get('/:slug',async (req,res)=>{
-    try {
-        // console.log(req.params.slug)
-        const getClass = await ClassModel.aggregate([
-            {
-                $lookup:{
-                    from:"phylums",
-                    foreignField:"_id",
-                    localField:"phylum",
-                    as:"phylum_doc"
-                }
-            }
-            ,{
-                $match:{
-                    $or:[
-                        {"className":{$eq:req.params.slug}},
-                        {"phylum_doc.phylumsName":{$eq:req.params.slug}}
-                    ]
-                }
-            }
-            ,{
-                $group:{
-                    _id:"$_id",
-                    className:{$first:"$className"},
-                    phylumsName:{$first:"$phylum_doc.phylumsName"}
-                }
-            }
-        ])
-        if(!getClass) res.status(404).json({Message:"Not found!"})
-        res.status(200).json(getClass)
-    } catch (error) {
-        res.status(400).json({Message:"Requests Invalid", Error:error})
-    }
-})
+
 
 module.exports = router;

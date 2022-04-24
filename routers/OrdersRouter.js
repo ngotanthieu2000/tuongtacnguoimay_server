@@ -3,9 +3,23 @@ const router=express.Router()
 const OrdersModel = require('../models/OrdersModel.js');
 
 router.get('/', async (req,res)=>{
-    const getOrders = await OrdersModel.find()
-    if(!getOrders) res.status(404).json({Message:"Not found!"})
-    res.status(404).json(getOrders)
+    try {
+        const getOrders = await OrdersModel.find({class:req.body.id ? req.body.id:""}).select(['_id','ordersName'])
+        if(!getOrders) res.status(404).json({Message:"Not found!"})
+        res.status(200).json(getOrders)
+    } catch (error) {
+        res.status(400).json({Message:"Requests Invalid", Error:error})
+    }
+})
+router.get('/:slug',async (req,res)=>{
+    try {
+        // console.log(req.params.slug)
+        const getOrders = await OrdersModel.find({class:req.params.slug ? req.params.slug:""}).select(['_id','ordersName'])
+        if(!getOrders) res.status(404).json({Message:"Not found!"})
+        res.status(200).json(getOrders)
+    } catch (error) {
+        res.status(400).json({Message:"Requests Invalid", Error:error})
+    }
 })
 
 router.post('/create',async (req,res)=>{

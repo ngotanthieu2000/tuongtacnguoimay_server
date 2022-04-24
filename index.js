@@ -1,16 +1,21 @@
 const express = require("express")
-const bodyParser = require('body-parser')
+const exphbs = require('express-handlebars');
 const mongoose = require('mongoose')
+require('dotenv').config()
 const app = express()
 const PORT = 3000
 const router = require('./routers/index.js')
-// const URI = 'mongodb://localhost:27017/forumsanimal';
-const URI = 'mongodb+srv://NienLuan:NienLuan@cluster0.u8igy.mongodb.net/forumsanimal?retryWrites=true&w=majority'
 
-app.use(express.json())
-app.use(router);
+// const URL = 'mongodb://localhost:27017/forumsanimal';
+// const URL = 'mongodb+srv://NienLuan:NienLuan@cluster0.u8igy.mongodb.net/forumsanimal?retryWrites=true&w=majority'
 
-mongoose.connect(URI, {useNewUrlParser: true, useUnifiedTopology:true})
+const bodyParser = require('body-parser')
+app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({extended:true}))
+
+app.use(router)
+
+mongoose.connect(process.env.DB_URI, {useNewUrlParser: true, useUnifiedTopology:true})
     .then(()=>{
         console.log("connect db success...");
         app.listen(PORT, ()=>{
@@ -19,3 +24,7 @@ mongoose.connect(URI, {useNewUrlParser: true, useUnifiedTopology:true})
     }).catch((err)=>{
         console.log(err);
     })
+
+
+
+

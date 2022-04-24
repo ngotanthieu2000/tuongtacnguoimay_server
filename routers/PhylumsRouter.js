@@ -3,10 +3,15 @@ const router=express.Router()
 const PhylumsModel = require('../models/PhylumsModel.js');
 
 router.get('/', async (req,res)=>{
-    const getPhylums = await PhylumsModel.find()
-    if(!getPhylums) res.status(404).json({Message:"Not found!"})
-    res.status(404).json(getPhylums)
+    try {
+        const getPhylums = await PhylumsModel.find({}).select(['_id','phylumsName'])
+        if(!getPhylums) res.status(404).json({Message:"Not found!"})
+        res.status(404).json(getPhylums)
+    } catch (error) {
+        res.status(403).json(error)
+    }
 })
+
 
 router.post('/create',async (req,res)=>{
     const createPhylums = new PhylumsModel(req.body)

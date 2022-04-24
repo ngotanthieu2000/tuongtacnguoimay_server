@@ -3,9 +3,23 @@ const router=express.Router()
 const FamilysModel = require('../models/FamilysModel');
 
 router.get('/', async (req,res)=>{
-    const getFamily = await FamilysModel.find()
-    if(!getFamily) res.status(404).json({Message:"Not found!"})
-    res.status(404).json(getFamily)
+    try {
+        const getFamilys = await FamilysModel.find({order:req.body.id ? req.body.id:""}).select(['_id','familysName'])
+        if(!getFamilys) res.status(404).json({Message:"Not found!"})
+        res.status(200).json(getFamilys)
+    } catch (error) {
+        res.status(400).json({Message:"Requests Invalid", Error:error})
+    }
+})
+router.get('/:slug',async (req,res)=>{
+    try {
+        // console.log(req.params.slug)
+        const getFamilys = await FamilysModel.find({order:req.params.slug ? req.params.slug:""}).select(['_id','familysName'])
+        if(!getFamilys) res.status(404).json({Message:"Not found!"})
+        res.status(200).json(getFamilys)
+    } catch (error) {
+        res.status(400).json({Message:"Requests Invalid", Error:error})
+    }
 })
 
 router.post('/create',async (req,res)=>{
