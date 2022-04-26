@@ -111,8 +111,8 @@ router.post(
         value: req.body.value,
         uicn: req.body.uicn,
         redlist: req.body.redlist,
-        ndcp: req.body.ndcp,
-        cites: req.body.cites,
+        ndcp: req.body.ndcp ? req.body.ndcp:"Không nằm trong danh mục bảo tồn",
+        cites:req.body.cites ? req.body.cites:"Không nằm trong danh mục",
         distribution: req.body.distribution,
         coordinates:
           typeof req.body.coordinates === "string"
@@ -216,8 +216,8 @@ router.put(
         value: req.body.value,
         uicn: req.body.uicn,
         redlist: req.body.redlist,
-        ndcp: req.body.ndcp,
-        cites: req.body.cites,
+        ndcp: req.body.ndcp ? req.body.ndcp:"Không nằm trong danh mục bảo tồn",
+        cites:req.body.cites ? req.body.cites:"Không nằm trong danh mục",
         distribution: req.body.distribution,
         coordinates:
           typeof req.body.coordinates === "string"
@@ -229,8 +229,7 @@ router.put(
         date: req.body.date,
         author_id: req.body.author_id,
       };
-      console.log(animal);
-
+      // console.log(animal);
       //update
       const update = await AnimalsModel.findByIdAndUpdate(
         { _id: req.body._id },
