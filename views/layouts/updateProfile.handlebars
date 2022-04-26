@@ -11,8 +11,8 @@
 
 	
 <!-- Form Name -->
-<form action="/users/register" method="post" enctype="multipart/form-data">
-  <legend>Form Name</legend>
+<form action="/users/update" method="put" enctype="multipart/form-data">
+  <legend>Update Profile</legend>
   <!-- Text input-->
   <div class="form-group">
     <label class="col-md-4 control-label" for="textinput">Fullname:</label>
@@ -40,7 +40,20 @@
 
     </div>
   </div>
-  
+  <!-- ID input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="idinput">ID:</label>
+    <div class="col-md-4">
+      <input
+        name="_id"
+        class="form-control input-md"
+        id="_id"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
   <!-- Text input-->
   <div class="form-group">
     <label class="col-md-4 control-label" for="E-mail">E-mail:</label>
@@ -80,11 +93,7 @@
   <!-- Button -->
   <div class="form-group">
     <div class="col-md-4">
-      <button
-        name="submit"
-        class="btn btn-primary"
-        id="submit"
-      >Register</button>
+      <button name="submit" class="btn btn-primary" id="submit">Update</button>
     </div>
   </div>
 </form>
