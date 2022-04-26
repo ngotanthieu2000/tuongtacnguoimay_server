@@ -24,7 +24,6 @@ const AnimalSchema = new Schema({
     place:{type:String},
     status:{type:String ,default: "Not approved yet"},
     avatar:{type:String},
-    date:{type:Date},
     author_id:{type:mongoose.Schema.Types.ObjectId, ref:"Users"},
     cause:{type:String, default:""}
 },{timestamps:true})

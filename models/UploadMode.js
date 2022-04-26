@@ -92,7 +92,7 @@ module.exports = {
         fileId,
       });
       // console.log(response.data);
-      console.log("Delete succesfully!");
+      // console.log("Delete succesfully!");
     } catch (error) {
       console.log(error.message);
     }

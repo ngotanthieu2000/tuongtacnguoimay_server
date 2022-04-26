@@ -30,6 +30,12 @@ app.get("/register", (req, res) => {
 app.get("/updateProfile", (req, res) => {
   res.render("home", { layout: "updateProfile", template: "home-template" });
 });
+app.get("/createAnimals", (req, res) => {
+    res.render("home", { layout: "createAnimals", template: "home-template" });
+  });
+  app.get("/updateAnimals", (req, res) => {
+    res.render("home", { layout: "updateAnimals", template: "home-template" });
+  });
 mongoose
   .connect(process.env.DB_URI, {
     useNewUrlParser: true,

@@ -1,0 +1,99 @@
+<link
+  href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+  rel="stylesheet"
+  id="bootstrap-css"
+/>
+<script
+  src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+></script>
+<script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+
+	
+<!-- Form Name -->
+<form action="/users/update" method="put" enctype="multipart/form-data">
+  <legend>Update Profile</legend>
+  <!-- Text input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">Fullname:</label>
+    <div class="col-md-4">
+      <input
+        name="fullname"
+        class="form-control input-md"
+        id="fullname"
+        type="text"
+        placeholder="Name"
+      />
+    </div>
+  </div>
+  <!-- Password input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="passwordinput">Password:</label>
+    <div class="col-md-4">
+      <input
+        name="password"
+        class="form-control input-md"
+        id="password"
+        type="password"
+        placeholder="Password"
+      />
+
+    </div>
+  </div>
+  <!-- ID input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="idinput">ID:</label>
+    <div class="col-md-4">
+      <input
+        name="_id"
+        class="form-control input-md"
+        id="_id"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- Text input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="E-mail">E-mail:</label>
+    <div class="col-md-4">
+      <input
+        name="email"
+        class="form-control input-md"
+        id="email"
+        type="text"
+        placeholder="E-mail"
+      />
+
+    </div>
+  </div>
+  <!-- Text input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="E-mail">Phone:</label>
+    <div class="col-md-4">
+      <input
+        name="phone"
+        class="form-control input-md"
+        id="phone"
+        type="text"
+        placeholder="Phone"
+      />
+
+    </div>
+  </div>
+  <!-- File Button -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="filebutton">Upload Avatar</label>
+    <div class="col-md-4">
+      <input name="avatar" class="input-file" id="avatar" type="file" />
+    </div>
+  </div>
+
+  <!-- Button -->
+  <div class="form-group">
+    <div class="col-md-4">
+      <button name="submit" class="btn btn-primary" id="submit">Update</button>
+    </div>
+  </div>
+</form>

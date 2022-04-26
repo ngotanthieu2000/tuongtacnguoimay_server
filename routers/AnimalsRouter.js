@@ -121,7 +121,6 @@ router.post(
         specimen_status: req.body.specimen_status,
         habitat: req.body.habitat,
         place: req.body.place,
-        date: req.body.date,
         author_id: req.body.author_id,
       };
       // console.log(animal)
@@ -173,24 +172,6 @@ router.put(
   async (req, res) => {
     try {
       //if update image then delete all image in drive
-      if (req.files["relatedImages"] || req.files["avatar"]) {
-        const getAnimal = await AnimalsModel.findOne({
-          _id: req.body._id,
-        }).select(["avatar", "relatedImages"]);
-        // console.log(`GetAnimals:${getAnimal}`)
-        if (req.files["avatar"]) {
-          await deleteFile(getAnimal.avatar.slice(43, 500));
-        }
-        if (req.files["relevantImages"]) {
-          Promise.all(
-            getAnimal.image.forEach(async (element) => {
-              if (animal.image.indexOf(element) > -1)
-                await deleteFile(element.slice(43, 500));
-            })
-          );
-        }
-      }
-
       let animal = {
         name: req.body.name,
         phylum: req.body.phylum,
@@ -226,15 +207,34 @@ router.put(
         specimen_status: req.body.specimen_status,
         habitat: req.body.habitat,
         place: req.body.place,
-        date: req.body.date,
         author_id: req.body.author_id,
       };
       // console.log(animal);
+      if (req.files["relatedImages"] || req.files["avatar"]) {
+        const getAnimal = await AnimalsModel.findOne({
+          _id: req.body._id,
+        }).select(["avatar", "relatedImages"]);
+        if (req.files["avatar"]) {
+          // console.log(`Delete avatar`)
+          await deleteFile(getAnimal.avatar.slice(43, 500));
+        }
+
+        if (req.files["relatedImages"]) {
+          // console.log(`Delete relatedImages`)
+            getAnimal.relatedImages.forEach(async (element) => {
+              // console.log(element)
+              // if (animal.relatedImages.indexOf(element) == -1)
+                await deleteFile(element.slice(43, 500));
+            }
+          );
+        }
+      }
+
+      
       //update
-      const update = await AnimalsModel.findByIdAndUpdate(
+      const animalsUpdate = await AnimalsModel.findOneAndUpdate(
         { _id: req.body._id },
-        animal,
-        { new: true }
+        animal
       );
       await animalsUpdate.save();
       res.status(200).json("Update Successfully");
