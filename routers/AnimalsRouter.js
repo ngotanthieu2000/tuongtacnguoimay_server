@@ -6,15 +6,12 @@ const { uploadFile, upload, deleteFile } = require("../models/UploadMode.js");
 const fs = require("fs");
 
 const auth = async (req, res, next) => {
-  // console.log(req.body.specimentCollector)
   let userId = req.body.user_id;
 
   if (!userId || userId == null) res.status(400).json("Do not have access");
   try {
-    const user = await UsersModel.findOne({ _id: userId })
-      .populate("role")
-      .select(["role.roleName"]);
-    // console.log({user})
+    const user = await UsersModel.findOne({ _id: userId }).populate("role");
+    // console.log({ user });
     if (!user) res.status(400).json("Do not have access");
     req.body.user_role = user.role.roleName;
     next();
@@ -23,7 +20,7 @@ const auth = async (req, res, next) => {
   }
 };
 
-// api  get list Animals when tranfer req.body.user_id, after middlerware auth called return req.body.user_role
+// api get list Animals when transfer req.body.user_id, after middleware auth calling returned req.body.user_role
 router.get("/", auth, async (req, res) => {
   try {
     let animals;
@@ -44,7 +41,7 @@ router.get("/", auth, async (req, res) => {
 router.get("/:slug", async (req, res) => {
   try {
     let animals;
-    if (req.params.slug === "All") {
+    if (req.params.slug === "all") {
       animals = await AnimalsModel.find({ status: "Approved" }).select([
         "_id",
         "avatar",
@@ -90,6 +87,7 @@ router.get("/:slug", async (req, res) => {
 }
 */
 //upload.fields([{name:'avatar'},{name:'relevantImages'}])
+//create animals
 router.post(
   "/create",
   upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
@@ -152,6 +150,7 @@ router.post(
   }
 );
 
+// editor approved or reject animals
 router.put("/update/:slug", auth, async (req, res) => {
   // console.log('Next success')
   try {
