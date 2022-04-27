@@ -7,43 +7,55 @@ const fs = require("fs");
 
 const auth = async (req, res, next) => {
   // console.log(req.body.specimentCollector)
-  let userId;
-  if (req.params.slug === "approved" || req.params.slug === "reject") {
-    userId = req.body.editor_id;
-  } else if (req.body.author_id) {
-    userId = req.body.author_id;
-  } else {
-    userId = req.body.admin_id;
-  }
-  // console.log({userId})
+  let userId = req.body.user_id;
+
   if (!userId || userId == null) res.status(400).json("Do not have access");
   try {
-    const user = await UsersModel.findOne({ _id: userId }).populate("role");
+    const user = await UsersModel.findOne({ _id: userId })
+      .populate("role")
+      .select(["role.roleName"]);
     // console.log({user})
     if (!user) res.status(400).json("Do not have access");
-    else if (req.params.slug && user.role.roleName === "Editor") next();
-    else if (req.body.author_id && user.role.roleName === "Author") next();
-    else if (req.body.admin_id && user.role.roleName === "Admin") next();
-    else res.status(400).json("Do not have access");
+    req.body.user_role = user.role.roleName;
+    next();
   } catch (error) {
     res.status(500).json(error);
   }
 };
-router.get("/", async (req, res) => {
+
+// api  get list Animals when tranfer req.body.user_id, after middlerware auth called return req.body.user_role
+router.get("/", auth, async (req, res) => {
   try {
-    const animals = await AnimalsModel.find().populate("author_id");
+    let animals;
+    if (req.body.user_role === "Author") {
+      animals = await AnimalsModel.find({ author_id: req.body.user_id });
+    } else if (req.body.user_role === "Editor") {
+      animals = await AnimalsModel.find({ status: { $ne: "Approved" } });
+    }
+
     if (!animals) res.status(404).json({ Message: "Not found!" });
     res.status(200).json(animals);
   } catch (error) {
     res.status(403).json(error);
   }
 });
+
+// get Animals by ClassName
 router.get("/:slug", async (req, res) => {
   try {
-    const animals = await AnimalsModel.find({
-      class: req.params.slug,
-      status: "Approved",
-    }).select(["_id", "avatar"]);
+    let animals;
+    if (req.params.slug === "All") {
+      animals = await AnimalsModel.find({ status: "Approved" }).select([
+        "_id",
+        "avatar",
+      ]);
+    } else {
+      animals = await AnimalsModel.find({
+        class: req.params.slug,
+        status: "Approved",
+      }).select(["_id", "avatar"]);
+    }
+
     if (!animals) res.status(404).json({ Message: "Not found!" });
     res.status(200).json(animals);
   } catch (error) {
@@ -111,8 +123,10 @@ router.post(
         value: req.body.value,
         uicn: req.body.uicn,
         redlist: req.body.redlist,
-        ndcp: req.body.ndcp ? req.body.ndcp:"Không nằm trong danh mục bảo tồn",
-        cites:req.body.cites ? req.body.cites:"Không nằm trong danh mục",
+        ndcp: req.body.ndcp
+          ? req.body.ndcp
+          : "Không nằm trong danh mục bảo tồn",
+        cites: req.body.cites ? req.body.cites : "Không nằm trong danh mục",
         distribution: req.body.distribution,
         coordinates:
           typeof req.body.coordinates === "string"
@@ -138,7 +152,7 @@ router.post(
   }
 );
 
-router.patch("/:slug", auth, async (req, res) => {
+router.put("/update/:slug", auth, async (req, res) => {
   // console.log('Next success')
   try {
     if (req.params.slug === "approved") {
@@ -197,8 +211,10 @@ router.put(
         value: req.body.value,
         uicn: req.body.uicn,
         redlist: req.body.redlist,
-        ndcp: req.body.ndcp ? req.body.ndcp:"Không nằm trong danh mục bảo tồn",
-        cites:req.body.cites ? req.body.cites:"Không nằm trong danh mục",
+        ndcp: req.body.ndcp
+          ? req.body.ndcp
+          : "Không nằm trong danh mục bảo tồn",
+        cites: req.body.cites ? req.body.cites : "Không nằm trong danh mục",
         distribution: req.body.distribution,
         coordinates:
           typeof req.body.coordinates === "string"
@@ -221,16 +237,14 @@ router.put(
 
         if (req.files["relatedImages"]) {
           // console.log(`Delete relatedImages`)
-            getAnimal.relatedImages.forEach(async (element) => {
-              // console.log(element)
-              // if (animal.relatedImages.indexOf(element) == -1)
-                await deleteFile(element.slice(43, 500));
-            }
-          );
+          getAnimal.relatedImages.forEach(async (element) => {
+            // console.log(element)
+            // if (animal.relatedImages.indexOf(element) == -1)
+            await deleteFile(element.slice(43, 500));
+          });
         }
       }
 
-      
       //update
       const animalsUpdate = await AnimalsModel.findOneAndUpdate(
         { _id: req.body._id },

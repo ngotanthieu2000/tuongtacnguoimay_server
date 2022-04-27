@@ -21,7 +21,8 @@ const validData = async (req, res, next) => {
     res.status(403).json(error);
   }
 };
-
+ 
+//get all user
 router.get("/", async (req, res) => {
   const getUsers = await UsersModel.find();
   if (!getUsers) res.status(404).json({ Message: "Not found!" });
