@@ -5,8 +5,24 @@ const UsersModel = require("../models/UsersModel.js");
 const fs = require("fs");
 const multer = require("multer");
 require("dotenv").config();
-const { uploadFile, deleteFile,getFile, upload } = require("../models/UploadMode.js");
+const { uploadFile, deleteFile, upload } = require("../models/UploadMode.js");
+const auth = async (req, res, next) => {
+  let userId = req.body.user_id;
 
+  if (!userId || userId == null) res.status(400).json("Do not have access");
+  try {
+    const user = await UsersModel.findOne({ _id: userId }).populate("role");
+
+    // console.log({ user });
+    if (!user || user == null) res.status(400).json("Do not have access");
+    else{
+      req.body.user_role = user.role.roleName;
+      next();
+    }
+  } catch (error) {
+    res.status(500).json(error);
+  }
+};
 const validData = async (req, res, next) => {
   try {
     let checkUser = await UsersModel.find({
@@ -148,4 +164,26 @@ router.put("/update", upload.fields([{ name: "avatar" }]), async (req, res) => {
   }
 });
 
+
+/* api update role user
+{
+    "user_id":"6266c18db831b2bdcebc9303", => id admin
+    "_id":"626750e30feaf8b1b44bc879", => id user need to update role
+    "role":"62624f12eb97237e30bf6a44" => vale role update
+}
+*/
+router.put('/role',auth, async(req,res)=>{
+  try {
+    if(req.body.user_role == "Admin"){
+      const updateRole = await UsersModel.findOneAndUpdate(
+        { _id: req.body._id },
+        {role:req.body.role} 
+      ); 
+      res.status(200).json("Update role successfully")
+    }
+    else res.status(400).json("Do not have access")
+  } catch (error) {
+    res.status(403).json(error);
+  }
+})
 module.exports = router;
