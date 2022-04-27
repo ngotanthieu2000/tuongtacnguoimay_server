@@ -80,14 +80,18 @@ router.post(
 router.get("/login", async (req, res) => {
   try {
     // console.log(req.body)
-    const user = await UsersModel.findOne({
-      $or: [
-        { email: { $eq: req.body.email } },
-        { phone: { $eq: req.body.phone } },
-      ],
-    });
+    let user;
+    if(req.body.email){
+      user = await UsersModel.findOne({email:req.body.email})
+    }
+    else if(req.body.phone){
+      user = await UsersModel.findOne({email:req.body.phone})
+    }
+    else res.status(400).json("Please enter email or phone");
+    
     // console.log(user)
-    if (user) {
+    if(!user || user == null) res.status(400).json("Make sure you have entered correct email or phone number")
+    else {
       const match = await bcrypt.compare(req.body.password, user.password);
       if (match) {
         // console.log('Mat khau oke')
@@ -95,7 +99,7 @@ router.get("/login", async (req, res) => {
       } else
         res
           .status(400)
-          .json("Make sure you have entered correct username/password");
+          .json("Make sure you have entered correct password");
     }
   } catch (error) {
     res.status(403).json(error);
