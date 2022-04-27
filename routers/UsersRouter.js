@@ -6,6 +6,7 @@ const fs = require("fs");
 const multer = require("multer");
 require("dotenv").config();
 const { uploadFile, deleteFile, upload } = require("../models/UploadMode.js");
+
 const auth = async (req, res, next) => {
   let userId = req.body.user_id;
 

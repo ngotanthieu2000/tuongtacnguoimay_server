@@ -6,17 +6,19 @@ const { uploadFile, upload, deleteFile } = require("../models/UploadMode.js");
 const fs = require("fs");
 
 const auth = async (req, res, next) => {
-  let userId = req.body.user_id;
-
-  if (!userId || userId == null) res.status(400).json("Do not have access");
-  try {
-    const user = await UsersModel.findOne({ _id: userId }).populate("role");
-    // console.log({ user });
-    if (!user) res.status(400).json("Do not have access");
-    req.body.user_role = user.role.roleName;
-    next();
-  } catch (error) {
-    res.status(500).json(error);
+  if (!req.body.user_id || req.body.user_id == null) res.status(400).json("Do not have access");
+  else{
+    try {
+      const user = await UsersModel.findOne({ _id: req.body.user_id }).populate("role");
+      console.log({ user });
+      if (!user) res.status(400).json("Do not have access");
+      else{
+        req.body.user_role = user.role.roleName;
+        next();
+      }
+    } catch (error) {
+      res.status(500).json(error);
+    }
   }
 };
 
