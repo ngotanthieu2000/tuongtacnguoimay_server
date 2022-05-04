@@ -52,7 +52,7 @@ module.exports = {
         requestBody: {
           name: `${name}-image`, //file name
           mimeType: ["image/jpg", "image/png", "image/gif", "image/bmp"],
-          parents: folder
+          parents: folder //if folder is true then return animals folder else return user folder
             ? ["1jHBJOjYfE6NUR1bjUiJL8pBcgnYTqjr8"]
             : ["1ZvlFbOKCioTEk6v43R1GE9W3GJiMtt5j"],
         },

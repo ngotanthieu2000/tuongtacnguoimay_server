@@ -10,7 +10,7 @@ const auth = async (req, res, next) => {
   else{
     try {
       const user = await UsersModel.findOne({ _id: req.body.user_id }).populate("role");
-      console.log({ user });
+      // console.log({ user });
       if (!user) res.status(400).json("Do not have access");
       else{
         req.body.user_role = user.role.roleName;
@@ -38,7 +38,17 @@ router.get("/", auth, async (req, res) => {
     res.status(403).json(error);
   }
 });
-
+router.get('/search',async(req,res)=>{
+  try {
+    if(req.query.name)
+    {
+      let animal = await AnimalsModel.find({name:req.query.name})
+      res.status(200).json(animal)
+    }
+  } catch (error) {
+    res.status(403).json(error);
+  }
+})
 // get Animals by ClassName
 router.get("/:slug", async (req, res) => {
   try {
@@ -62,32 +72,7 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-// create animal document
-/*
-{
-    "scientificName":"",
-    "vietnameseName":"",
-    "commonName":"",
-    "phylum":"",
-    "class":"",
-    "order":"",
-    "family":"",
-    "image":"",
-    "morphologicalCharacterization":"",
-    "ecologicalCharacteristics":"",
-    "value":[""],
-    "uicn":"",
-    "redlist":"",
-    "distribution":"",
-    "coordinate":"",
-    "specimen":"",
-    "habitat":"",
-    "place":"",
-    "status":"",
-    "specimenCollectionDate":"",
-    "specimentCollector":""
-}
-*/
+
 //upload.fields([{name:'avatar'},{name:'relevantImages'}])
 //create animals
 router.post(
@@ -127,7 +112,7 @@ router.post(
           ? req.body.ndcp
           : "Không nằm trong danh mục bảo tồn",
         cites: req.body.cites ? req.body.cites : "Không nằm trong danh mục",
-        distribution: req.body.distribution,
+        distribute: req.body.distribute,
         coordinates:
           typeof req.body.coordinates === "string"
             ? JSON.parse(req.body.coordinates)
@@ -216,7 +201,7 @@ router.put(
           ? req.body.ndcp
           : "Không nằm trong danh mục bảo tồn",
         cites: req.body.cites ? req.body.cites : "Không nằm trong danh mục",
-        distribution: req.body.distribution,
+        distribute: req.body.distribute,
         coordinates:
           typeof req.body.coordinates === "string"
             ? JSON.parse(req.body.coordinates)

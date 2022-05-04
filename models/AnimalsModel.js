@@ -15,7 +15,7 @@ const AnimalSchema = new Schema({
     red_list:{type:String},
     ndcp:{type:String},
     cites:{type:String},
-    distribution:{type:String},
+    distribute:{type:String},
     coordinates:{
         type: Array
     },

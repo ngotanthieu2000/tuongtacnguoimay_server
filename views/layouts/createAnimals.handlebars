@@ -10,86 +10,285 @@
 <!------ Include the above in your HEAD tag ---------->
 
 	
-<!-- Form Name -->
-<form action="/users/update" method="put" enctype="multipart/form-data">
-  <legend>Update Profile</legend>
-  <!-- Text input-->
+<!-- Form Animals -->
+{{!-- <form action="/animals/create" method="put" enctype="multipart/form-data"> --}}
+<form id="createAnimal" >
+  <legend>createAnimal</legend>
+  <!-- Name input-->
   <div class="form-group">
-    <label class="col-md-4 control-label" for="textinput">Fullname:</label>
+    <label class="col-md-4 control-label" for="textinput">name:</label>
     <div class="col-md-4">
       <input
-        name="fullname"
+        name="name"
         class="form-control input-md"
-        id="fullname"
+        id="name"
         type="text"
         placeholder="Name"
       />
     </div>
   </div>
-  <!-- Password input-->
+  <!-- User Id input-->
   <div class="form-group">
-    <label class="col-md-4 control-label" for="passwordinput">Password:</label>
+    <label class="col-md-4 control-label" for="textinput">User Id:</label>
     <div class="col-md-4">
       <input
-        name="password"
+        name="user_id"
         class="form-control input-md"
-        id="password"
-        type="password"
-        placeholder="Password"
+        id="user_id"
+        type="text"
+        placeholder="user_id"
       />
 
     </div>
   </div>
-  <!-- ID input-->
+  <!-- Phylum input-->
   <div class="form-group">
-    <label class="col-md-4 control-label" for="idinput">ID:</label>
+    <label class="col-md-4 control-label" for="textinput">Phylum:</label>
     <div class="col-md-4">
       <input
-        name="_id"
+        name="phylum"
         class="form-control input-md"
-        id="_id"
+        id="phylum"
         type="text"
         placeholder="ID"
       />
 
     </div>
   </div>
-  <!-- Text input-->
+  <!-- class input-->
   <div class="form-group">
-    <label class="col-md-4 control-label" for="E-mail">E-mail:</label>
+    <label class="col-md-4 control-label" for="textinput">class:</label>
     <div class="col-md-4">
       <input
-        name="email"
+        name="class"
         class="form-control input-md"
-        id="email"
+        id="class"
         type="text"
-        placeholder="E-mail"
+        placeholder="ID"
       />
 
     </div>
   </div>
-  <!-- Text input-->
+  <!-- order input-->
   <div class="form-group">
-    <label class="col-md-4 control-label" for="E-mail">Phone:</label>
+    <label class="col-md-4 control-label" for="textinput">order:</label>
     <div class="col-md-4">
       <input
-        name="phone"
+        name="order"
         class="form-control input-md"
-        id="phone"
+        id="order"
         type="text"
-        placeholder="Phone"
+        placeholder="ID"
       />
 
     </div>
   </div>
-  <!-- File Button -->
+  <!-- family input-->
   <div class="form-group">
-    <label class="col-md-4 control-label" for="filebutton">Upload Avatar</label>
+    <label class="col-md-4 control-label" for="textinput">family:</label>
+    <div class="col-md-4">
+      <input
+        name="family"
+        class="form-control input-md"
+        id="family"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- morphological_features input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">morphological_features:</label>
+    <div class="col-md-4">
+      <textarea
+        name="morphological_features"
+        class="form-control input-md"
+        id="morphological_features"
+        type="ar"
+        placeholder="ID"
+      >
+      </textarea> 
+    </div>
+  </div>
+  <!-- ecologicalCharacteristics input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">ecologicalCharacteristics:</label>
+    <div class="col-md-4">
+      <input
+        name="ecologicalCharacteristics"
+        class="form-control input-md"
+        id="ecologicalCharacteristics"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- value input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">value:</label>
+    <div class="col-md-4">
+      <input
+        name="value"
+        class="form-control input-md"
+        id="value"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- uicn input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">uicn:</label>
+    <div class="col-md-4">
+      <input
+        name="uicn"
+        class="form-control input-md"
+        id="uicn"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- redlist input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">redlist:</label>
+    <div class="col-md-4">
+      <input
+        name="redlist"
+        class="form-control input-md"
+        id="redlist"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- distribute input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">distribute:</label>
+    <div class="col-md-4">
+      <input
+        name="distribute"
+        class="form-control input-md"
+        id="distribute"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- specimen_status input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">specimen_status:</label>
+    <div class="col-md-4">
+      <input
+        name="specimen_status"
+        class="form-control input-md"
+        id="specimen_status"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- habitat input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">habitat:</label>
+    <div class="col-md-4">
+      <input
+        name="habitat"
+        class="form-control input-md"
+        id="habitat"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- place input-->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="textinput">place:</label>
+    <div class="col-md-4">
+      <input
+        name="place"
+        class="form-control input-md"
+        id="place"
+        type="text"
+        placeholder="ID"
+      />
+
+    </div>
+  </div>
+  <!-- File avatar -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="filebutton">avatar</label>
     <div class="col-md-4">
       <input name="avatar" class="input-file" id="avatar" type="file" />
     </div>
   </div>
+<!-- File relatedImages -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="filebutton">relatedImages</label>
+    <div class="col-md-4">
+      <input name="relatedImages" class="input-file" id="relatedImages" type="file"  multiple/>
+    </div>
+  </div>
 
+  <!-- Coordinates -->
+  <div class="form-group">
+    <label class="col-md-4 control-label" for="filebutton">Coordinates</label>
+    <div class="col-md-4">
+      <input
+        name="lat"
+        class="form-control input-md"
+        id="lat"
+        type="text"
+        placeholder="lat"
+      />
+     <input
+        name="long"
+        class="form-control input-md"
+        id="long"
+        type="text"
+        placeholder="long"
+      />
+      <button name="add" class="btn btn-primary" id="add" >Add</button>
+      <table class="table" id="table">
+        <thead>
+          <tr>
+            <th scope="col">LAT</th>
+            <th scope="col">LONG</th>
+            <th scope="col">Handle</th>
+          </tr>
+        </thead>
+        <tbody id="table_body" >
+          <script> 
+            let numberCoodinates = 0;
+            var table = document.getElementById("table")
+            function deleteCoordinates(element) {
+              document.getElementById(element.parentNode.parentNode.id).remove()
+              }
+            document.getElementById('add').onclick = function (event) {
+               event.preventDefault()
+               
+              let lat = document.getElementById('lat').value
+              let long = document.getElementById('long').value
+              let row = `<tr id='table_row_${++numberCoodinates}'>
+                          <td>${lat}</td>
+                          <td>${long}</td>
+                          <td><button type="button" onclick='deleteCoordinates(this)' id='delete_row_${numberCoodinates}' name="delete_coordinates" class="btn btn-warning" >Delete</button></td>
+                          </tr>`
+              document.querySelector('#table_body').insertAdjacentHTML('beforeend',row)
+            }
+          </script>
+        </tbody>
+      </table>
+    </div>
+  </div>
   <!-- Button -->
   <div class="form-group">
     <div class="col-md-4">
@@ -97,3 +296,8 @@
     </div>
   </div>
 </form>
+
+<script>
+  
+
+</script>

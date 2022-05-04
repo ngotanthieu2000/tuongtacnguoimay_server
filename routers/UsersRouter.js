@@ -70,10 +70,7 @@ router.post(
         password: req.body.password,
         email: req.body.email,
         phone: req.body.phone,
-        social_media:
-          typeof req.body.social_media === "string"
-            ? JSON.parse(req.body.social_media)
-            : social_media,
+        social_media: (!req.body.social_media) ? null: typeof req.body.social_media === "string" ? JSON.parse(req.body.social_media): social_media,
         role: req.body.role ? req.body.role : "6248717928be8d544f553229",
         avatar: await uploadFile(
           req.body.fullname.replace(/\s/g, ""),
@@ -123,43 +120,29 @@ router.get("/login", async (req, res) => {
   }
 });
 
-router.put("/update", upload.fields([{ name: "avatar" }]), async (req, res) => {
+router.put("/update", upload.fields([{ name: "avatar" }]),validData, async (req, res) => {
   try {
-    if (req.files["avatar"]) {
+    const salt = await bcrypt.genSalt(10);
+     if(req.body.password) req.body.password = await bcrypt.hash(req.body.password, salt);
+
+    var user = req.body
+    
+    if (req.files["avatar"]) { // if request update provide new avatar image then solve in below
       console.log("Cap nhat avatar");
       const getUser = await UsersModel.findOne({ _id: req.body._id }).select([
-        "avatar",
+        "avatar","fullname"
       ]);
       await deleteFile(getUser.avatar.slice(43, 500));
+      user.avatar =  await uploadFile(getUser.fullname.replace(/\s/g, ""),req.files["avatar"][0].path,false)
     }
-
-    const salt = await bcrypt.genSalt(10);
-    req.body.password = await bcrypt.hash(req.body.password, salt);
-    // console.log(typeof(req.body.social_media))
-    let user = {
-      fullname: req.body.fullname,
-      password: req.body.password,
-      email: req.body.email,
-      phone: req.body.phone,
-      social_media:
-        typeof req.body.social_media === "string"
-          ? JSON.parse(req.body.social_media)
-          : social_media,
-      role: req.body.role ? req.body.role : "6248717928be8d544f553229",
-      avatar: await uploadFile(
-        req.body.fullname.replace(/\s/g, ""),
-        req.files["avatar"][0].path,
-        false
-      ),
-    };
     // console.log(user)
     const updateUser = await UsersModel.findOneAndUpdate(
       { _id: req.body._id },
-       user 
+      user,{new:true} 
     );
     await updateUser.save();
-    // console.log(createUser)
-      res.status(200).json({ Message: "Successfully!", User: updateUser });
+    // console.log(updateUser)
+    res.status(200).json({ Message: "Successfully!", User: updateUser });
   } catch (error) {
     res.status(403).json(error);
   }
@@ -169,16 +152,16 @@ router.put("/update", upload.fields([{ name: "avatar" }]), async (req, res) => {
 /* api update role user
 {
     "user_id":"6266c18db831b2bdcebc9303", => id admin
-    "_id":"626750e30feaf8b1b44bc879", => id user need to update role
-    "role":"62624f12eb97237e30bf6a44" => vale role update
+    "user_update":"626750e30feaf8b1b44bc879", =>the user id you want to update role
+    "role_update":"62624f12eb97237e30bf6a44" =>  role id you want update
 }
 */
 router.put('/role',auth, async(req,res)=>{
   try {
     if(req.body.user_role == "Admin"){
       const updateRole = await UsersModel.findOneAndUpdate(
-        { _id: req.body._id },
-        {role:req.body.role} 
+        { _id: req.body.user_update },
+        {role:req.body.role_update} 
       ); 
       res.status(200).json("Update role successfully")
     }
@@ -187,4 +170,5 @@ router.put('/role',auth, async(req,res)=>{
     res.status(403).json(error);
   }
 })
+
 module.exports = router;
