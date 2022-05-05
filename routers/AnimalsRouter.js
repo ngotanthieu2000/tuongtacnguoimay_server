@@ -6,13 +6,16 @@ const { uploadFile, upload, deleteFile } = require("../models/UploadMode.js");
 const fs = require("fs");
 
 const auth = async (req, res, next) => {
-  if (!req.body.user_id || req.body.user_id == null) res.status(400).json("Do not have access");
-  else{
+  if (!req.body.user_id || req.body.user_id == null)
+    res.status(400).json("Do not have access");
+  else {
     try {
-      const user = await UsersModel.findOne({ _id: req.body.user_id }).populate("role");
+      const user = await UsersModel.findOne({ _id: req.body.user_id }).populate(
+        "role"
+      );
       // console.log({ user });
       if (!user) res.status(400).json("Do not have access");
-      else{
+      else {
         req.body.user_role = user.role.roleName;
         next();
       }
@@ -21,22 +24,51 @@ const auth = async (req, res, next) => {
     }
   }
 };
-const valid = async(req,res,next)=>{
-  if(req.body.name )
-  {
-    const animal = await AnimalsModel.findOne({name:{$eq:req.body.name}})
-    if(animal) res.status(400).json('Animals is exist')
-    else next()
+const valid = async (req, res, next) => {
+  if (req.body.name) {
+    const animal = await AnimalsModel.findOne({ name: { $eq: req.body.name } });
+    if (animal) res.status(400).json("Animals is exist");
+    else next();
   }
-}
+};
+
+// get all animals is Approved
+router.get("/", async (req, res) => {
+  try {
+    let animals;
+    animals = await AnimalsModel.find({ status: { $eq: "Approved" } })
+      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
+      .populate({path:"class",select:'className',model:"Classes"})
+      .populate({path:"order",select:'ordersName',model:"Orders"})
+      .populate({path:"family",select:'familysName',model:"Familys"})
+      .populate({path:"author_id",select:'fullname',model:"Users"})
+    if (!animals) res.status(404).json({ Message: "Not found!" });
+    res.status(200).json(animals);
+  } catch (error) {
+    res.status(403).json(error);
+  }
+});
+
 // api get list Animals when transfer req.body.user_id, after middleware auth calling returned req.body.user_role
-router.get("/", auth, async (req, res) => {
+router.get("/getList", auth, async (req, res) => {
   try {
     let animals;
     if (req.body.user_role === "Author") {
-      animals = await AnimalsModel.find({ author_id: req.body.user_id });
+      animals = await AnimalsModel.find({
+        author_id: req.body.user_id,
+      })
+      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
+      .populate({path:"class",select:'className',model:"Classes"})
+      .populate({path:"order",select:'ordersName',model:"Orders"})
+      .populate({path:"family",select:'familysName',model:"Familys"})
+      .populate({path:"author_id",select:'fullname',model:"Users"})
     } else if (req.body.user_role === "Editor") {
-      animals = await AnimalsModel.find({ status: { $ne: "Approved" } });
+      animals = await AnimalsModel.find({ status: { $ne: "Approved" } })
+      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
+      .populate({path:"class",select:'className',model:"Classes"})
+      .populate({path:"order",select:'ordersName',model:"Orders"})
+      .populate({path:"family",select:'familysName',model:"Familys"})
+      .populate({path:"author_id",select:'fullname',model:"Users"})
     }
 
     if (!animals) res.status(404).json({ Message: "Not found!" });
@@ -46,20 +78,28 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
-router.get('/search',async(req,res)=>{
+// get animals by Keyword of user search
+router.get("/search", async (req, res) => {
   try {
-    if(req.query.name)
-    {
-      let animal = await AnimalsModel.find({name:{$regex:req.query.name, $options:'si'}})
-      res.status(200).json(animal)
-    }
-    else res.status(404).json('Not Found')
+    if (req.query.name) {
+      let animal = await AnimalsModel.find({
+        name: { $regex: req.query.name, $options: "si" },
+      })
+      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
+      .populate({path:"class",select:'className',model:"Classes"})
+      .populate({path:"order",select:'ordersName',model:"Orders"})
+      .populate({path:"family",select:'familysName',model:"Familys"})
+      .populate({path:"author_id",select:'fullname',model:"Users"})
+      
+      res.status(200).json(animal);
+    } else res.status(404).json("Not Found");
   } catch (error) {
     res.status(403).json(error);
   }
-})
-// get Animals by ClassName
-router.get("/:slug", async (req, res) => {
+});
+
+// get list Animals by ClassName
+router.get("/search/:slug", async (req, res) => {
   try {
     let animals;
     if (req.params.slug === "all") {
@@ -81,13 +121,12 @@ router.get("/:slug", async (req, res) => {
   }
 });
 
-
-//upload.fields([{name:'avatar'},{name:'relevantImages'}])
 //create animals
 router.post(
   "/create",
   upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
-  auth,valid,
+  auth,
+  valid,
   async (req, res) => {
     try {
       // console.log("Next success:",req.body.coordinates)
@@ -147,10 +186,10 @@ router.post(
 );
 
 // editor approved or reject animals
-router.put("/update/:slug", auth , async (req, res) => {
+router.put("/update/:slug", auth, async (req, res) => {
   // console.log('Next success')
   try {
-    if (req.params.slug === "approved" && req.body.user_role ==='Editor') {
+    if (req.params.slug === "approved" && req.body.user_role === "Editor") {
       const animalsUpdate = await AnimalsModel.findByIdAndUpdate(
         { _id: req.body.animalId },
         { status: "Approved", cause: "" },
@@ -159,7 +198,10 @@ router.put("/update/:slug", auth , async (req, res) => {
       await animalsUpdate.save();
       // console.log(animalsUpdate)
       res.status(200).json("Approved Successfully");
-    } else if (req.params.slug === "reject" && req.body.user_role ==='Editor') {
+    } else if (
+      req.params.slug === "reject" &&
+      req.body.user_role === "Editor"
+    ) {
       console.log("Reject");
       const animalsUpdate = await AnimalsModel.findByIdAndUpdate(
         { _id: req.body.animalId },
@@ -168,10 +210,8 @@ router.put("/update/:slug", auth , async (req, res) => {
       );
       await animalsUpdate.save();
       res.status(200).json("Reject Successfully");
-    }
-    else
-    {
-      res.status(403).json("Do not have access")
+    } else {
+      res.status(403).json("Do not have access");
     }
   } catch (error) {
     res.status(403).json(error);
@@ -181,7 +221,8 @@ router.put("/update/:slug", auth , async (req, res) => {
 router.put(
   "/update",
   upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
-  auth,valid,
+  auth,
+  valid,
   async (req, res) => {
     try {
       //if update image then delete all image in drive
@@ -231,12 +272,12 @@ router.put(
           _id: req.body._id,
         }).select(["avatar", "relatedImages"]);
         if (req.files["avatar"]) {
-          console.log(`Delete avatar`)
+          console.log(`Delete avatar`);
           await deleteFile(getAnimal.avatar.slice(43, 500));
         }
 
         if (req.files["relatedImages"]) {
-          console.log(`Delete relatedImages`)
+          console.log(`Delete relatedImages`);
           getAnimal.relatedImages.forEach(async (element) => {
             // console.log(element)
             // if (animal.relatedImages.indexOf(element) == -1)
@@ -259,28 +300,31 @@ router.put(
   }
 );
 
-router.delete('/delete/:id' ,auth, async (req,res)=>{
+router.delete("/delete/:id", auth, async (req, res) => {
   try {
     // console.log(req.params.id)
-    const deleteAnimal = await AnimalsModel.findOneAndDelete({_id:req.params.id},{
-      writeConcern: {
-         w : 1,
-         j : true,
-         wtimeout : 1000
+    const deleteAnimal = await AnimalsModel.findOneAndDelete(
+      { _id: req.params.id },
+      {
+        writeConcern: {
+          w: 1,
+          j: true,
+          wtimeout: 1000,
+        },
       }
-   })
+    );
     // delete file image in google drive
-    console.log(`Delete avatar`)
-      await deleteFile(deleteAnimal.avatar.slice(43, 500));
-    console.log(`Delete relatedImages`)
+    console.log(`Delete avatar`);
+    await deleteFile(deleteAnimal.avatar.slice(43, 500));
+    console.log(`Delete relatedImages`);
     deleteAnimal.relatedImages.forEach(async (element) => {
       await deleteFile(element.slice(43, 500));
     });
 
     // console.log(deleteAnimal)
-    res.status(200).json("Delete Successfullly")
+    res.status(200).json("Delete Successfullly");
   } catch (error) {
     res.status(403).json(error);
   }
-})
+});
 module.exports = router;

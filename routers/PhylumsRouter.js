@@ -12,7 +12,6 @@ router.get('/', async (req,res)=>{
     }
 })
 
-
 router.post('/create',async (req,res)=>{
     const createPhylums = new PhylumsModel(req.body)
     if(!createPhylums) res.status(403).json({Message:"Error, please try again"})

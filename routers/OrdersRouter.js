@@ -4,17 +4,7 @@ const OrdersModel = require('../models/OrdersModel.js');
 
 router.get('/', async (req,res)=>{
     try {
-        const getOrders = await OrdersModel.find({class:req.body.id ? req.body.id:""}).select(['_id','ordersName'])
-        if(!getOrders) res.status(404).json({Message:"Not found!"})
-        res.status(200).json(getOrders)
-    } catch (error) {
-        res.status(400).json({Message:"Requests Invalid", Error:error})
-    }
-})
-router.get('/:slug',async (req,res)=>{
-    try {
-        // console.log(req.params.slug)
-        const getOrders = await OrdersModel.find({class:req.params.slug ? req.params.slug:""}).select(['_id','ordersName'])
+        const getOrders = await OrdersModel.find().populate({path:"class",select:"className"}).select(['_id','ordersName'])
         if(!getOrders) res.status(404).json({Message:"Not found!"})
         res.status(200).json(getOrders)
     } catch (error) {
@@ -38,6 +28,7 @@ router.delete('/delete', async (req,res) =>{
     if(!deleteOrders) res.status(403).json({Message:"Error, please try again"})
     res.status(200).json(deleteOrders)
 })
+
 //search orders by classname or ordername
 router.get('/:slug',async (req,res)=>{
     try {
