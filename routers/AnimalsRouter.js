@@ -42,7 +42,7 @@ router.get('/search',async(req,res)=>{
   try {
     if(req.query.name)
     {
-      let animal = await AnimalsModel.find({name:req.query.name})
+      let animal = await AnimalsModel.find({name:{$regex:req.query.name, $options:'si'}})
       res.status(200).json(animal)
     }
   } catch (error) {
@@ -138,10 +138,10 @@ router.post(
 );
 
 // editor approved or reject animals
-router.put("/update/:slug", auth, async (req, res) => {
+router.put("/update/:slug", auth , async (req, res) => {
   // console.log('Next success')
   try {
-    if (req.params.slug === "approved") {
+    if (req.params.slug === "approved" && req.body.user_role ==='Editor') {
       const animalsUpdate = await AnimalsModel.findByIdAndUpdate(
         { _id: req.body.animalId },
         { status: "Approved", cause: "" },
@@ -150,7 +150,7 @@ router.put("/update/:slug", auth, async (req, res) => {
       await animalsUpdate.save();
       // console.log(animalsUpdate)
       res.status(200).json("Approved Successfully");
-    } else if (req.params.slug === "reject") {
+    } else if (req.params.slug === "reject" && req.body.user_role ==='Editor') {
       console.log("Reject");
       const animalsUpdate = await AnimalsModel.findByIdAndUpdate(
         { _id: req.body.animalId },
@@ -159,6 +159,10 @@ router.put("/update/:slug", auth, async (req, res) => {
       );
       await animalsUpdate.save();
       res.status(200).json("Reject Successfully");
+    }
+    else
+    {
+      res.status(403).json("Do not have access")
     }
   } catch (error) {
     res.status(403).json(error);
