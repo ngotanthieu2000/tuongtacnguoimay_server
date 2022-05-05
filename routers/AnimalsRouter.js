@@ -21,7 +21,14 @@ const auth = async (req, res, next) => {
     }
   }
 };
-
+const valid = async(req,res,next)=>{
+  if(req.body.name )
+  {
+    const animal = await AnimalsModel.findOne({name:{$eq:req.body.name}})
+    if(animal) res.status(400).json('Animals is exist')
+    else next()
+  }
+}
 // api get list Animals when transfer req.body.user_id, after middleware auth calling returned req.body.user_role
 router.get("/", auth, async (req, res) => {
   try {
@@ -38,6 +45,7 @@ router.get("/", auth, async (req, res) => {
     res.status(403).json(error);
   }
 });
+
 router.get('/search',async(req,res)=>{
   try {
     if(req.query.name)
@@ -45,6 +53,7 @@ router.get('/search',async(req,res)=>{
       let animal = await AnimalsModel.find({name:{$regex:req.query.name, $options:'si'}})
       res.status(200).json(animal)
     }
+    else res.status(404).json('Not Found')
   } catch (error) {
     res.status(403).json(error);
   }
@@ -78,7 +87,7 @@ router.get("/:slug", async (req, res) => {
 router.post(
   "/create",
   upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
-  auth,
+  auth,valid,
   async (req, res) => {
     try {
       // console.log("Next success:",req.body.coordinates)
@@ -120,7 +129,7 @@ router.post(
         specimen_status: req.body.specimen_status,
         habitat: req.body.habitat,
         place: req.body.place,
-        author_id: req.body.author_id,
+        author_id: req.body.user_id,
       };
       // console.log(animal)
       const createAnimal = new AnimalsModel(animal);
@@ -154,7 +163,7 @@ router.put("/update/:slug", auth , async (req, res) => {
       console.log("Reject");
       const animalsUpdate = await AnimalsModel.findByIdAndUpdate(
         { _id: req.body.animalId },
-        { cause: req.body.cause, status: "Reject" },
+        { cause: req.body.cause, status: "Rejected" },
         { new: true }
       );
       await animalsUpdate.save();
@@ -172,7 +181,7 @@ router.put("/update/:slug", auth , async (req, res) => {
 router.put(
   "/update",
   upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
-  auth,
+  auth,valid,
   async (req, res) => {
     try {
       //if update image then delete all image in drive
@@ -213,20 +222,21 @@ router.put(
         specimen_status: req.body.specimen_status,
         habitat: req.body.habitat,
         place: req.body.place,
-        author_id: req.body.author_id,
+        // author_id: req.body.author_id,
       };
       // console.log(animal);
+
       if (req.files["relatedImages"] || req.files["avatar"]) {
         const getAnimal = await AnimalsModel.findOne({
           _id: req.body._id,
         }).select(["avatar", "relatedImages"]);
         if (req.files["avatar"]) {
-          // console.log(`Delete avatar`)
+          console.log(`Delete avatar`)
           await deleteFile(getAnimal.avatar.slice(43, 500));
         }
 
         if (req.files["relatedImages"]) {
-          // console.log(`Delete relatedImages`)
+          console.log(`Delete relatedImages`)
           getAnimal.relatedImages.forEach(async (element) => {
             // console.log(element)
             // if (animal.relatedImages.indexOf(element) == -1)
@@ -240,6 +250,7 @@ router.put(
         { _id: req.body._id },
         animal
       );
+
       await animalsUpdate.save();
       res.status(200).json("Update Successfully");
     } catch (error) {
@@ -247,4 +258,29 @@ router.put(
     }
   }
 );
+
+router.delete('/delete/:id' ,auth, async (req,res)=>{
+  try {
+    // console.log(req.params.id)
+    const deleteAnimal = await AnimalsModel.findOneAndDelete({_id:req.params.id},{
+      writeConcern: {
+         w : 1,
+         j : true,
+         wtimeout : 1000
+      }
+   })
+    // delete file image in google drive
+    console.log(`Delete avatar`)
+      await deleteFile(deleteAnimal.avatar.slice(43, 500));
+    console.log(`Delete relatedImages`)
+    deleteAnimal.relatedImages.forEach(async (element) => {
+      await deleteFile(element.slice(43, 500));
+    });
+
+    // console.log(deleteAnimal)
+    res.status(200).json("Delete Successfullly")
+  } catch (error) {
+    res.status(403).json(error);
+  }
+})
 module.exports = router;
