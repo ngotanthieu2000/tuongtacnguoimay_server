@@ -1,8 +1,9 @@
 const express = require("express");
+const path = require("path");
 const router = express.Router();
 const AnimalsModel = require("../models/AnimalsModel.js");
 const UsersModel = require("../models/UsersModel.js");
-const { uploadFile, upload, deleteFile } = require("../models/UploadMode.js");
+const { upload_animal, unlink, setNumber } = require("../models/UploadMode.js");
 const fs = require("fs");
 
 const auth = async (req, res, next) => {
@@ -32,16 +33,54 @@ const valid = async (req, res, next) => {
   }
 };
 
+router.get("/getByAuthor/:id", async (req, res) => {
+  try {
+    let animals;
+    animals = await AnimalsModel.find({
+      author_id: req.params.id,
+      status: { $eq: "Approved" },
+    })
+      // .populate({ path: "phylum", select: "phylumsName", model: "Phylums" })
+      // .populate({ path: "class", select: "className", model: "Classes" })
+      // .populate({ path: "order", select: "ordersName", model: "Orders" })
+      // .populate({ path: "family", select: "familysName", model: "Familys" })
+      // .populate({ path: "author_id", select: "fullname", model: "Users" })
+      .select(["_id", "avatar"]);
+    if (!animals) res.status(404).json({ Message: "Not found!" });
+    res.status(200).json(animals);
+  } catch (error) {
+    res.status(403).json(error);
+  }
+});
+
+router.get("/getById/:id", async (req, res) => {
+  try {
+    let animals;
+    animals = await AnimalsModel.find({
+      _id: req.params.id,
+      status: { $eq: "Approved" },
+    })
+      .populate({ path: "phylum", select: "phylumsName", model: "Phylums" })
+      .populate({ path: "class", select: "className", model: "Classes" })
+      .populate({ path: "order", select: "ordersName", model: "Orders" })
+      .populate({ path: "family", select: "familysName", model: "Familys" })
+      .populate({ path: "author_id", select: "fullname", model: "Users" });
+    if (!animals) res.status(404).json({ Message: "Not found!" });
+    res.status(200).json(animals);
+  } catch (error) {
+    res.status(403).json(error);
+  }
+});
 // get all animals is Approved
 router.get("/", async (req, res) => {
   try {
     let animals;
     animals = await AnimalsModel.find({ status: { $eq: "Approved" } })
-      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
-      .populate({path:"class",select:'className',model:"Classes"})
-      .populate({path:"order",select:'ordersName',model:"Orders"})
-      .populate({path:"family",select:'familysName',model:"Familys"})
-      .populate({path:"author_id",select:'fullname',model:"Users"})
+      .populate({ path: "phylum", select: "phylumsName", model: "Phylums" })
+      .populate({ path: "class", select: "className", model: "Classes" })
+      .populate({ path: "order", select: "ordersName", model: "Orders" })
+      .populate({ path: "family", select: "familysName", model: "Familys" })
+      .populate({ path: "author_id", select: "fullname", model: "Users" });
     if (!animals) res.status(404).json({ Message: "Not found!" });
     res.status(200).json(animals);
   } catch (error) {
@@ -57,18 +96,18 @@ router.get("/getList", auth, async (req, res) => {
       animals = await AnimalsModel.find({
         author_id: req.body.user_id,
       })
-      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
-      .populate({path:"class",select:'className',model:"Classes"})
-      .populate({path:"order",select:'ordersName',model:"Orders"})
-      .populate({path:"family",select:'familysName',model:"Familys"})
-      .populate({path:"author_id",select:'fullname',model:"Users"})
+        .populate({ path: "phylum", select: "phylumsName", model: "Phylums" })
+        .populate({ path: "class", select: "className", model: "Classes" })
+        .populate({ path: "order", select: "ordersName", model: "Orders" })
+        .populate({ path: "family", select: "familysName", model: "Familys" })
+        .populate({ path: "author_id", select: "fullname", model: "Users" });
     } else if (req.body.user_role === "Editor") {
       animals = await AnimalsModel.find({ status: { $ne: "Approved" } })
-      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
-      .populate({path:"class",select:'className',model:"Classes"})
-      .populate({path:"order",select:'ordersName',model:"Orders"})
-      .populate({path:"family",select:'familysName',model:"Familys"})
-      .populate({path:"author_id",select:'fullname',model:"Users"})
+        .populate({ path: "phylum", select: "phylumsName", model: "Phylums" })
+        .populate({ path: "class", select: "className", model: "Classes" })
+        .populate({ path: "order", select: "ordersName", model: "Orders" })
+        .populate({ path: "family", select: "familysName", model: "Familys" })
+        .populate({ path: "author_id", select: "fullname", model: "Users" });
     }
 
     if (!animals) res.status(404).json({ Message: "Not found!" });
@@ -85,12 +124,12 @@ router.get("/search", async (req, res) => {
       let animal = await AnimalsModel.find({
         name: { $regex: req.query.name, $options: "si" },
       })
-      .populate({ path: "phylum" ,select:'phylumsName', model:"Phylums"})
-      .populate({path:"class",select:'className',model:"Classes"})
-      .populate({path:"order",select:'ordersName',model:"Orders"})
-      .populate({path:"family",select:'familysName',model:"Familys"})
-      .populate({path:"author_id",select:'fullname',model:"Users"})
-      
+        .populate({ path: "phylum", select: "phylumsName", model: "Phylums" })
+        .populate({ path: "class", select: "className", model: "Classes" })
+        .populate({ path: "order", select: "ordersName", model: "Orders" })
+        .populate({ path: "family", select: "familysName", model: "Familys" })
+        .populate({ path: "author_id", select: "fullname", model: "Users" });
+
       res.status(200).json(animal);
     } else res.status(404).json("Not Found");
   } catch (error) {
@@ -124,12 +163,13 @@ router.get("/search/:slug", async (req, res) => {
 //create animals
 router.post(
   "/create",
-  upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
+  upload_animal.fields([{ name: "avatar" }, { name: "relatedImages" }]),
   auth,
-  valid,
   async (req, res) => {
     try {
+      setNumber();
       // console.log("Next success:",req.body.coordinates)
+
       // console.log(req.files)
       let animal = {
         name: req.body.name,
@@ -137,17 +177,10 @@ router.post(
         class: req.body.class,
         order: req.body.order,
         family: req.body.family,
-        relatedImages: await Promise.all(
-          req.files["relatedImages"].map(
-            async (a) =>
-              await uploadFile(req.body.name.replace(/\s/g, ""), a.path, true)
-          )
-        ),
-        avatar: await uploadFile(
-          req.body.name.replace(/\s/g, ""),
-          req.files["avatar"][0].path,
-          true
-        ),
+        relatedImages: req.files["relatedImages"].map((e) => {
+          return e.filename;
+        }),
+        avatar: req.files["avatar"][0].filename,
         morphological_features:
           typeof req.body.morphological_features === "string"
             ? JSON.parse(req.body.morphological_features)
@@ -155,7 +188,7 @@ router.post(
         ecological_characteristics: req.body.ecological_characteristics,
         value: req.body.value,
         uicn: req.body.uicn,
-        redlist: req.body.redlist,
+        red_list: req.body.redlist,
         ndcp: req.body.ndcp
           ? req.body.ndcp
           : "Không nằm trong danh mục bảo tồn",
@@ -170,7 +203,7 @@ router.post(
         place: req.body.place,
         author_id: req.body.user_id,
       };
-      // console.log(animal)
+      console.log(animal);
       const createAnimal = new AnimalsModel(animal);
       if (createAnimal) {
         // console.log(createAnimal)
@@ -220,79 +253,134 @@ router.put("/update/:slug", auth, async (req, res) => {
 
 router.put(
   "/update",
-  upload.fields([{ name: "avatar" }, { name: "relatedImages" }]),
+  upload_animal.fields([{ name: "avatar" }, { name: "relatedImages" }]),
   auth,
-  valid,
   async (req, res) => {
     try {
+      setNumber();
       //if update image then delete all image in drive
       let animal = {
         name: req.body.name,
+        relatedImages: req.files["relatedImages"].map((e) => {
+          return e.filename;
+        }),
+        avatar: req.files["avatar"][0].filename,
         phylum: req.body.phylum,
         class: req.body.class,
         order: req.body.order,
         family: req.body.family,
-        relatedImages: await Promise.all(
-          req.files["relatedImages"].map(
-            async (a) =>
-              await uploadFile(req.body.name.replace(/\s/g, ""), a.path, true)
-          )
-        ),
-        avatar: await uploadFile(
-          req.body.name.replace(/\s/g, ""),
-          req.files["avatar"][0].path,
-          true
-        ),
-        morphological_features:
-          typeof req.body.morphological_features === "string"
-            ? JSON.parse(req.body.morphological_features)
-            : morphological_features,
+        morphological_features: req.body.morphological_features,
+        // (typeof req.body.morphological_features === "string")
+        //   ? JSON.parse(req.body.morphological_features)
+        //   : morphological_features,
         ecological_characteristics: req.body.ecological_characteristics,
         value: req.body.value,
         uicn: req.body.uicn,
-        redlist: req.body.redlist,
+        red_list: req.body.redlist,
         ndcp: req.body.ndcp
           ? req.body.ndcp
           : "Không nằm trong danh mục bảo tồn",
         cites: req.body.cites ? req.body.cites : "Không nằm trong danh mục",
         distribute: req.body.distribute,
-        coordinates:
-          typeof req.body.coordinates === "string"
-            ? JSON.parse(req.body.coordinates)
-            : coordinates,
+        coordinates: req.body.coordinates,
+        // typeof req.body.coordinates === "string"
+        //   ? JSON.parse(req.body.coordinates)
+        //   : coordinates,
         specimen_status: req.body.specimen_status,
         habitat: req.body.habitat,
         place: req.body.place,
         // author_id: req.body.author_id,
       };
-      // console.log(animal);
 
-      if (req.files["relatedImages"] || req.files["avatar"]) {
-        const getAnimal = await AnimalsModel.findOne({
+      Object.keys(animal).map(function (key, index) {
+        if (!animal[key]) {
+          delete animal[key];
+        }
+      });
+
+      if (
+        animal.morphological_features &&
+        typeof animal.morphological_features === "string"
+      ) {
+        JSON.parse(animal.morphological_features);
+      }
+      if (animal.coordinates && typeof animal.coordinates === "string") {
+        animal.coordinates = JSON.parse(animal.coordinates);
+      }
+
+      if (req.files["avatar"] || req.files["relatedImages"]) {
+        const getAnimals = await AnimalsModel.findOne({
           _id: req.body._id,
         }).select(["avatar", "relatedImages"]);
-        if (req.files["avatar"]) {
+
+        // console.log(fs.existsSync(path.join(
+        //         __dirname,
+        //         "../images/animals/" + getAnimals.avatar
+        //       ))
+        //     );
+
+        if (req.files["avatar"] && animal.avatar != getAnimals.avatar) {
           console.log(`Delete avatar`);
-          await deleteFile(getAnimal.avatar.slice(43, 500));
+          if (
+            fs.existsSync(
+              path.join(
+                __dirname,
+                "../images/animals/" +  + getAnimals.avatar
+              )
+            )
+          ) {
+            await unlink(
+              path.join(__dirname, "../images/animals") +
+                "/" +
+                getAnimals.avatar,
+              function (err) {
+                if (err) {
+                  return console.log("Delete error: " + err);
+                } else {
+                  console.log("file deleted successfully");
+                }
+              }
+            );
+          }
         }
 
         if (req.files["relatedImages"]) {
           console.log(`Delete relatedImages`);
-          getAnimal.relatedImages.forEach(async (element) => {
+          getAnimals.relatedImages.forEach(async (element) => {
             // console.log(element)
-            // if (animal.relatedImages.indexOf(element) == -1)
-            await deleteFile(element.slice(43, 500));
+            if (
+              animal.relatedImages.indexOf(element) == -1 &&
+              fs.existsSync(
+                path.join(
+                  __dirname,
+                  "../images/animals" + "/" + element
+                )
+              )
+            ) {
+              await unlink(
+                path.join(__dirname, "../images/animals") + "/" + element,
+                function (err) {
+                  if (err) {
+                    return console.log("Delete error: " + err);
+                  } else {
+                    console.log("file deleted successfully");
+                  }
+                }
+              );
+            }
           });
         }
       }
 
-      //update
+      console.log(animal);
+      // update
       const animalsUpdate = await AnimalsModel.findOneAndUpdate(
         { _id: req.body._id },
         animal
       );
 
       await animalsUpdate.save();
+
       res.status(200).json("Update Successfully");
     } catch (error) {
       res.status(403).json(error);

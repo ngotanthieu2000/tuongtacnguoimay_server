@@ -1,117 +1,77 @@
 const fs = require("fs");
+const path = require("path");
 const { unlink } = require("fs/promises");
-const { google } = require("googleapis");
-require("dotenv").config();
-const CLIENT_ID = process.env.CLIENT_ID;
-const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI = process.env.REDIRECT_URI;
-const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-const oauth2Client = new google.auth.OAuth2(
-  CLIENT_ID,
-  CLIENT_SECRET,
-  REDIRECT_URI
-);
-
-var url = oauth2Client.generateAuthUrl({
-  access_type: "offline",
-  scope: [
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/drive.metadata",
-  ],
-});
-
-oauth2Client.setCredentials({
-  refresh_token: REFRESH_TOKEN,
-});
-
-const drive = google.drive({
-  version: "v3",
-  auth: oauth2Client,
-});
-
+// const moment = require('moment');
 const multer = require("multer");
 
-var storage = multer.diskStorage({
+function nonAccentVietnamese(str) {
+  str = str.toLowerCase();
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+  str = str.replace(/đ/g, "d");
+  // Some system encode vietnamese combining accent as individual utf-8 characters
+  str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); // Huyền sắc hỏi ngã nặng 
+  str = str.replace(/\u02C6|\u0306|\u031B/g, ""); // Â, Ê, Ă, Ơ, Ư
+  return str;
+}
+function setNumber(){
+  number =1;
+}
+var storage_users = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./images");
+    cb(null, path.join(__dirname, "../images/avatar"));
   },
   filename: function (req, file, cb) {
-    cb(null, file.originalname);
+    let d = new Date();
+    let moment =
+      d.getDate() +
+      "-" +
+      (d.getMonth() + 1) +
+      "-" +
+      d.getFullYear() +
+      "-" +
+      d.getHours();
+    cb(null, nonAccentVietnamese(req.body.fullname).replace(/\s/g,'')+moment+path.extname(file.originalname));
+  },
+});
+var number = 1;
+var storage_animals = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "../images/animals"));
+  },
+  filename: function (req, file, cb) {
+    let d = new Date();
+    let filename ;
+    let moment =
+      d.getDate() +
+      "-" +
+      (d.getMonth() + 1) +
+      "-" +
+      d.getFullYear() +
+      "-" +
+      d.getHours();
+      if(file.fieldname =='relatedImages'){
+        filename = nonAccentVietnamese(req.body.name).replace(/\s/g,'') + "-" +file.fieldname +"-" + number.toString();
+        // console.log("RelatedImages:",number)
+        number++;
+      }
+      else{
+        filename =nonAccentVietnamese(req.body.name).replace(/\s/g,'')+"-"+ file.fieldname  ;
+      }
+    cb(null, filename +"-"+ moment+path.extname(file.originalname));
+    // cb(null, file.originalname);
   },
 });
 
-var upload = multer({ storage });
+var upload_user = multer({ storage: storage_users });
+var upload_animal = multer({ storage: storage_animals });
 module.exports = {
-  multer: multer,
-  upload: upload,
-  uploadFile: async function (name, filePath, folder) {
-    try {
-      const response = await drive.files.create({
-        requestBody: {
-          name: `${name}-image`, //file name
-          mimeType: ["image/jpg", "image/png", "image/gif", "image/bmp"],
-          parents: folder //if folder is true then return animals folder else return user folder
-            ? ["1jHBJOjYfE6NUR1bjUiJL8pBcgnYTqjr8"]
-            : ["1ZvlFbOKCioTEk6v43R1GE9W3GJiMtt5j"],
-        },
-        media: {
-          mimeType: ["image/jpg", "image/png", "image/gif", "image/bmp"],
-          body: fs.createReadStream(filePath),
-        },
-      });
-      await unlink(filePath);
-      const fileId = response.data.id;
-      //change file permisions to public.
-      await drive.permissions.create({
-        fileId: fileId,
-        requestBody: {
-          role: "reader",
-          type: "anyone",
-        },
-      });
-      //obtain the webview and webcontent links
-      const result = await drive.files.get({
-        fileId: fileId,
-        avatar: "webViewLink",
-        fields: "webViewLink, webContentLink",
-      });
-
-      // console.log({Data:result.data,fileId});
-      // console.log(result)
-      return `https://drive.google.com/uc?export=view&id=${fileId}`;
-    } catch (error) {
-      //report the error message
-      console.log(error.message);
-    }
-  },
-  deleteFile: async function (fileId) {
-    try {
-      const response = await drive.files.delete({
-        fileId,
-      });
-      // console.log(response.data);
-      // console.log("Delete succesfully!");
-    } catch (error) {
-      console.log(error.message);
-    }
-  },
-  getFile: async function (fileId, folder) {
-    try {
-      const response = await drive.files.get(
-        { fileId: fileId },
-        {
-          parents: folder
-            ? ["1jHBJOjYfE6NUR1bjUiJL8pBcgnYTqjr8"]
-            : ["1ZvlFbOKCioTEk6v43R1GE9W3GJiMtt5j"],
-        }
-      );
-      console.log("Title: " + response.title);
-      console.log("Description: " + response.description);
-      console.log("MIME type: " + response.mimeType);
-    } catch (error) {
-      console.log(error.message);
-    }
-  },
+  setNumber,
+  upload_user: upload_user,
+  upload_animal:upload_animal,
+  unlink
 };
